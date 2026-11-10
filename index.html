@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Поверх — окна больше не залипают поверх всех</title>
+  <meta name="description" content="Poverh показывает все окна Windows в режиме «поверх всех», в том числе закреплённые другими программами, и снимает их одним нажатием. Разовая лицензия, без подписки.">
+  <link rel="icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+  <meta property="og:title" content="Поверх / Poverh">
+  <meta property="og:description" content="See every always-on-top window on Windows — including ones other apps left stuck — and unpin them in one click.">
+  <meta property="og:image" content="images/preview-ru.png">
+  <style>
+    :root {
+      --bg: #0c1016;
+      --bg2: #121821;
+      --card: #181f29;
+      --line: #2c3644;
+      --text: #f3f5f8;
+      --muted: #93a0b0;
+      --gold: #e8b86d;
+      --gold2: #f0d19a;
+      --ok: #3ddc97;
+      --danger: #e85d4c;
+      --shadow: 0 30px 80px rgba(0,0,0,.45);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: Manrope, "Segoe UI", sans-serif; }
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { color: var(--gold2); }
+    .wrap { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 22px 0; position: sticky; top: 0; z-index: 20;
+      background: linear-gradient(180deg, rgba(12,16,22,.96), rgba(12,16,22,.86) 70%, transparent);
+      backdrop-filter: blur(10px);
+    }
+    .brand { display: flex; gap: 12px; align-items: center; font-weight: 800; letter-spacing: .02em; }
+    .brand img { width: 36px; height: 36px; border-radius: 9px; }
+    nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    nav a.navl { color: var(--muted); padding: 8px 10px; font-size: 14px; }
+    .chip, .btn {
+      border: 1px solid var(--line); background: var(--card); color: var(--text);
+      border-radius: 999px; padding: 8px 14px; font: 600 13px/1 Manrope, sans-serif; cursor: pointer;
+    }
+    .chip.on { border-color: var(--gold); color: var(--gold); }
+    .btn.gold { background: var(--gold); color: #1a1408; border-color: var(--gold); }
+    .btn.gold:hover { background: var(--gold2); }
+    .btn.ghost:disabled, .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .hero { padding: 48px 0 20px; display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
+    h1 { font-family: "Source Serif 4", Georgia, serif; font-weight: 600; font-size: clamp(36px, 5vw, 58px); line-height: 1.12; margin: 0 0 18px; }
+    .lead { font-size: 18px; color: var(--muted); line-height: 1.55; margin: 0 0 28px; }
+    .cta { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .note { font-size: 13px; color: var(--muted); margin-top: 12px; }
+    .shot {
+      background: radial-gradient(120% 80% at 50% 0%, #243044, #121821 55%);
+      border: 1px solid var(--line); border-radius: 18px; padding: 16px; box-shadow: var(--shadow);
+    }
+    .shot img { width: 100%; display: block; border-radius: 10px; background: #0f141c; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 28px 0 10px; }
+    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+    .stat b { display: block; font-size: 22px; color: var(--gold); }
+    .stat span { color: var(--muted); font-size: 13px; }
+    section { padding: 56px 0; }
+    h2 { font-family: "Source Serif 4", Georgia, serif; font-size: 34px; margin: 0 0 10px; }
+    .section-lead { color: var(--muted); margin: 0 0 28px; max-width: 680px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
+    .card h3 { margin: 0 0 8px; font-size: 18px; }
+    .card p { margin: 0; color: var(--muted); line-height: 1.5; }
+    .pricebar { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .plan { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 8px; }
+    .plan.featured { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset, var(--shadow); }
+    .plan .who { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+    .plan .sum { font-size: 32px; font-weight: 800; }
+    .plan .sum small { font-size: 14px; color: var(--muted); font-weight: 500; }
+    .plan ul { margin: 10px 0 18px; padding: 0 0 0 18px; color: var(--muted); line-height: 1.6; flex: 1; }
+    .compare { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .compare th, .compare td { border-bottom: 1px solid var(--line); text-align: left; padding: 10px 8px; vertical-align: top; }
+    .compare th { color: var(--muted); font-weight: 600; }
+    details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin: 0 0 10px; }
+    details summary { cursor: pointer; font-weight: 650; }
+    details p { color: var(--muted); margin: 10px 0 0; line-height: 1.55; }
+    footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .soon { font-size: 12px; color: var(--muted); }
+    @media (max-width: 880px) {
+      .hero, .grid3, .plans, .stats { grid-template-columns: 1fr; }
+      h1 { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand"><img src="images/logo.png" alt=""><span data-i="brand">Поверх</span></div>
+      <nav>
+        <a class="navl" href="#features" data-i="navFeatures">Возможности</a>
+        <a class="navl" href="#pricing" data-i="navPricing">Тарифы</a>
+        <a class="navl" href="#faq" data-i="navFaq">Вопросы</a>
+        <button class="chip on" id="langRu" type="button">RU</button>
+        <button class="chip" id="langEn" type="button">EN</button>
+      </nav>
+    </header>
+
+    <div class="hero">
+      <div>
+        <h1 data-i="h1">Окна больше не залипают поверх всех</h1>
+        <p class="lead" data-i="lead">Поверх показывает каждое окно Windows в режиме «поверх всех» — в том числе оставленные другими программами — и снимает их одним нажатием. Без прав администратора и без подписки.</p>
+        <div class="cta">
+          <a class="btn gold" href="#download" id="btnDownload" data-i="ctaFree">Скачать бесплатно</a>
+          <button class="btn ghost" type="button" disabled data-i="ctaPro">Купить Pro — скоро</button>
+        </div>
+        <p class="note" data-i="ctaNote">Оплата и магазин ещё не подключены. MVP уже можно собрать и запустить с компьютера.</p>
+      </div>
+      <div class="shot">
+        <img id="heroShot" src="images/preview-ru.png" alt="Окно приложения Поверх">
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b data-i="s1b">Аудит</b><span data-i="s1t">Видно, какая программа закрепила окно</span></div>
+      <div class="stat"><b data-i="s2b">1 клик</b><span data-i="s2t">Снять все чужие закрепления, системные под защитой</span></div>
+      <div class="stat"><b data-i="s3b">0 ₸</b><span data-i="s3t">Бесплатный уровень без телеметрии и без учётки</span></div>
+    </div>
+
+    <section id="features">
+      <h2 data-i="featTitle">Зачем он нужен, если есть PowerToys</h2>
+      <p class="section-lead" data-i="featLead">PowerToys бесплатно закрепляет активное окно. Поверх решает другую боль: когда чат, браузер или монтажная программа остаются поверх всех и не отдают передний план. Вы видите полный список и снимаете чужие флаги.</p>
+      <div class="grid3">
+        <article class="card"><h3 data-i="f1t">Полный список</h3><p data-i="f1d">Заголовок, процесс, PID и источник: Поверх, другая программа или система.</p></article>
+        <article class="card"><h3 data-i="f2t">Горячие клавиши</h3><p data-i="f2d">Ctrl+Alt+T — закрепить или снять активное. Ctrl+Alt+U — снять наши. Ctrl+Alt+Shift+P — открыть окно.</p></article>
+        <article class="card"><h3 data-i="f3t">Безопасный съём</h3><p data-i="f3d">Панель задач, Пуск и служебные окна не снимаются массовой кнопкой. Без прав администратора.</p></article>
+        <article class="card"><h3 data-i="f4t">Трей и автозапуск</h3><p data-i="f4d">Работает в фоне и по желанию стартует вместе с Windows — только для текущего пользователя.</p></article>
+        <article class="card"><h3 data-i="f5t">Русский и English</h3><p data-i="f5d">Интерфейс сразу на двух языках, без обязательного аккаунта Microsoft Store.</p></article>
+        <article class="card"><h3 data-i="f6t">Локально</h3><p data-i="f6d">Нет телеметрии, нет облака, нет подписки в самой программе.</p></article>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="pricebar">
+        <div>
+          <h2 data-i="priceTitle">Тарифы</h2>
+          <p class="section-lead" data-i="priceLead">Разовая лицензия, цены сразу в тенге, рублях и долларах. Оплата пока не принимается — это витрина тарифов.</p>
+        </div>
+        <div>
+          <button class="chip on" id="curKzt" type="button">₸</button>
+          <button class="chip" id="curRub" type="button">₽</button>
+          <button class="chip" id="curUsd" type="button">$</button>
+        </div>
+      </div>
+      <div class="plans">
+        <div class="plan">
+          <div class="who" data-i="freeWho">Для себя</div>
+          <div class="sum" data-price="free">0 ₸</div>
+          <div class="muted" data-i="freeSub">навсегда</div>
+          <ul>
+            <li data-i="free1">Список всех окон «поверх всех»</li>
+            <li data-i="free2">Снять выбранное и снять все чужие</li>
+            <li data-i="free3">Защита системных окон</li>
+            <li data-i="free4">Без телеметрии</li>
+          </ul>
+          <a class="btn gold" href="#download" data-i="ctaFree">Скачать бесплатно</a>
+        </div>
+        <div class="plan featured">
+          <div class="who" data-i="proWho">Pro · 1 компьютер</div>
+          <div class="sum" data-price="pro">2 490 ₸</div>
+          <div class="muted" data-i="proSub">разовая лицензия</div>
+          <ul>
+            <li data-i="pro1">Всё из Free</li>
+            <li data-i="pro2">Закрепление окон и горячие клавиши</li>
+            <li data-i="pro3">Автозапуск и работа в трее</li>
+            <li data-i="pro4">Русский и английский</li>
+          </ul>
+          <button class="btn" type="button" disabled data-i="ctaPro">Купить Pro — скоро</button>
+          <span class="soon" data-i="paySoon">Gumroad / Lemon Squeezy / Kaspi — позже</span>
+        </div>
+        <div class="plan">
+          <div class="who" data-i="teamWho">Team · до 5 компьютеров</div>
+          <div class="sum" data-price="team">6 900 ₸</div>
+          <div class="muted" data-i="teamSub">разовая, можно для работы</div>
+          <ul>
+            <li data-i="team1">Всё из Pro</li>
+            <li data-i="team2">Коммерческое использование</li>
+            <li data-i="team3">До 5 компьютеров у одного покупателя</li>
+            <li data-i="team4">Приоритетная поддержка (когда появится магазин)</li>
+          </ul>
+          <button class="btn" type="button" disabled data-i="ctaTeam">Купить Team — скоро</button>
+        </div>
+      </div>
+      <p class="note" data-i="priceJust">Ориентиры: PinPoint — разовая цена $6.99 в Microsoft Store (блог разработчика, 17 октября 2026); WindowTop Pro — $19 за 3 компьютера на официальном сайте; Actual Window Guard — $39.95. Pro дешевле WindowTop и закрывает боль «чужое окно залипло», которой нет у бесплатного PowerToys Always On Top.</p>
+    </section>
+
+    <section>
+      <h2 data-i="cmpTitle">Рядом с другими программами</h2>
+      <div class="card" style="overflow:auto">
+        <table class="compare">
+          <thead>
+            <tr>
+              <th data-i="c0">Продукт</th>
+              <th data-i="c1">Цена</th>
+              <th data-i="c2">Что умеет</th>
+              <th data-i="c3">Ограничение</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PowerToys Always On Top</td>
+              <td data-i="p1">Бесплатно</td>
+              <td data-i="p1d">Закрепить активное окно</td>
+              <td data-i="p1l">Не показывает чужие закрепления</td>
+            </tr>
+            <tr>
+              <td>PinPoint</td>
+              <td>$6.99 *</td>
+              <td data-i="p2d">Закрепление, рамка, прозрачность</td>
+              <td data-i="p2l">Магазин Microsoft, узкий инструмент</td>
+            </tr>
+            <tr>
+              <td>WindowTop Pro</td>
+              <td>$19</td>
+              <td data-i="p3d">PiP, прозрачность, якоря</td>
+              <td data-i="p3l">Шире и дороже, если нужна только «отклейка»</td>
+            </tr>
+            <tr>
+              <td>Поверх Pro</td>
+              <td>2 490 ₸ / 590 ₽ / $9.90</td>
+              <td data-i="p4d">Аудит + закрепление + снять все</td>
+              <td data-i="p4l">Пока Windows-only, магазин не подключён</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="note">* <span data-i="pinpointNote">Официальный сайт PinPoint отсылает к витрине Store; сумма $6.99 указана в блоге Automata Labs от 17 октября 2026 как регулярная цена в США.</span></p>
+      </div>
+    </section>
+
+    <section id="faq">
+      <h2 data-i="faqTitle">Вопросы</h2>
+      <details open><summary data-i="q1">Нужны ли права администратора?</summary><p data-i="a1">Нет. Программа запускается от имени текущего пользователя и не меняет брандмауэр и UAC.</p></details>
+      <details><summary data-i="q2">Это подписка?</summary><p data-i="a2">Нет. Free бесплатен всегда, Pro и Team задуманы как разовая лицензия. Оплата ещё не принимается.</p></details>
+      <details><summary data-i="q3">Что будет с панелью задач и Диспетчером задач?</summary><p data-i="a3">Системные окна помечены как защищённые и пропускаются при массовом снятии.</p></details>
+      <details><summary data-i="q4">Есть ли версия для macOS?</summary><p data-i="a4">В MVP нет. Общий ввод клавиатуры и мыши Mac↔Windows — отдельный продукт (KM-Share), он в работе.</p></details>
+      <details><summary data-i="q5">Куда исчезают данные?</summary><p data-i="a5">Никуда. Настройки хранятся только в папке пользователя, телеметрии нет.</p></details>
+    </section>
+
+    <section id="download">
+      <h2 data-i="dlTitle">Скачать</h2>
+      <p class="section-lead" data-i="dlLead">Публичный установщик в магазине появится вместе с оплатой. Сейчас это рабочий MVP: папка проекта на компьютере и эта страница.</p>
+      <div class="cta">
+        <a class="btn gold" href="https://github.com/viproman01/poverh" data-i="dlRepo">Репозиторий и страница</a>
+        <button class="btn" type="button" disabled data-i="dlSetup">Установщик — скоро</button>
+      </div>
+    </section>
+
+    <footer>
+      <div data-i="foot">Поверх / Poverh · Windows 10 и 11 · разовая лицензия, без подписки. Это витрина продукта, не оферта.</div>
+      <div>© 2026</div>
+    </footer>
+  </div>
+  <script>
+    const I = {
+      ru: {
+        brand:"Поверх", navFeatures:"Возможности", navPricing:"Тарифы", navFaq:"Вопросы",
+        h1:"Окна больше не залипают поверх всех",
+        lead:"Поверх показывает каждое окно Windows в режиме «поверх всех» — в том числе оставленные другими программами — и снимает их одним нажатием. Без прав администратора и без подписки.",
+        ctaFree:"Скачать бесплатно", ctaPro:"Купить Pro — скоро", ctaTeam:"Купить Team — скоро",
+        ctaNote:"Оплата и магазин ещё не подключены. MVP уже можно собрать и запустить с компьютера.",
+        s1b:"Аудит", s1t:"Видно, какая программа закрепила окно",
+        s2b:"1 клик", s2t:"Снять все чужие закрепления, системные под защитой",
+        s3b:"0 ₸", s3t:"Бесплатный уровень без телеметрии и без учётки",
+        featTitle:"Зачем он нужен, если есть PowerToys",
+        featLead:"PowerToys бесплатно закрепляет активное окно. Поверх решает другую боль: когда чат, браузер или монтажная программа остаются поверх всех и не отдают передний план. Вы видите полный список и снимаете чужие флаги.",
+        f1t:"Полный список", f1d:"Заголовок, процесс, PID и источник: Поверх, другая программа или система.",
+        f2t:"Горячие клавиши", f2d:"Ctrl+Alt+T — закрепить или снять активное. Ctrl+Alt+U — снять наши. Ctrl+Alt+Shift+P — открыть окно.",
+        f3t:"Безопасный съём", f3d:"Панель задач, Пуск и служебные окна не снимаются массовой кнопкой. Без прав администратора.",
+        f4t:"Трей и автозапуск", f4d:"Работает в фоне и по желанию стартует вместе с Windows — только для текущего пользователя.",
+        f5t:"Русский и English", f5d:"Интерфейс сразу на двух языках, без обязательного аккаунта Microsoft Store.",
+        f6t:"Локально", f6d:"Нет телеметрии, нет облака, нет подписки в самой программе.",
+        priceTitle:"Тарифы", priceLead:"Разовая лицензия, цены сразу в тенге, рублях и долларах. Оплата пока не принимается — это витрина тарифов.",
+        freeWho:"Для себя", freeSub:"навсегда",
+        free1:"Список всех окон «поверх всех»", free2:"Снять выбранное и снять все чужие", free3:"Защита системных окон", free4:"Без телеметрии",
+        proWho:"Pro · 1 компьютер", proSub:"разовая лицензия",
+        pro1:"Всё из Free", pro2:"Закрепление окон и горячие клавиши", pro3:"Автозапуск и работа в трее", pro4:"Русский и английский",
+        teamWho:"Team · до 5 компьютеров", teamSub:"разовая, можно для работы",
+        team1:"Всё из Pro", team2:"Коммерческое использование", team3:"До 5 компьютеров у одного покупателя", team4:"Приоритетная поддержка (когда появится магазин)",
+        paySoon:"Gumroad / Lemon Squeezy / Kaspi — позже",
+        priceJust:"Ориентиры: PinPoint — разовая цена $6.99 в Microsoft Store (блог разработчика, 17 октября 2026); WindowTop Pro — $19 за 3 компьютера на официальном сайте; Actual Window Guard — $39.95. Pro дешевле WindowTop и закрывает боль «чужое окно залипло», которой нет у бесплатного PowerToys Always On Top.",
+        cmpTitle:"Рядом с другими программами",
+        c0:"Продукт", c1:"Цена", c2:"Что умеет", c3:"Ограничение",
+        p1:"Бесплатно", p1d:"Закрепить активное окно", p1l:"Не показывает чужие закрепления",
+        p2d:"Закрепление, рамка, прозрачность", p2l:"Магазин Microsoft, узкий инструмент",
+        p3d:"PiP, прозрачность, якоря", p3l:"Шире и дороже, если нужна только «отклейка»",
+        p4d:"Аудит + закрепление + снять все", p4l:"Пока Windows-only, магазин не подключён",
+        pinpointNote:"Официальный сайт PinPoint отсылает к витрине Store; сумма $6.99 указана в блоге Automata Labs от 17 октября 2026 как регулярная цена в США.",
+        faqTitle:"Вопросы",
+        q1:"Нужны ли права администратора?", a1:"Нет. Программа запускается от имени текущего пользователя и не меняет брандмауэр и UAC.",
+        q2:"Это подписка?", a2:"Нет. Free бесплатен всегда, Pro и Team задуманы как разовая лицензия. Оплата ещё не принимается.",
+        q3:"Что будет с панелью задач и Диспетчером задач?", a3:"Системные окна помечены как защищённые и пропускаются при массовом снятии.",
+        q4:"Есть ли версия для macOS?", a4:"В MVP нет. Общий ввод клавиатуры и мыши Mac↔Windows — отдельный продукт (KM-Share), он в работе.",
+        q5:"Куда исчезают данные?", a5:"Никуда. Настройки хранятся только в папке пользователя, телеметрии нет.",
+        dlTitle:"Скачать", dlLead:"Публичный установщик в магазине появится вместе с оплатой. Сейчас это рабочий MVP: папка проекта на компьютере и эта страница.",
+        dlRepo:"Репозиторий и страница", dlSetup:"Установщик — скоро",
+        foot:"Поверх / Poverh · Windows 10 и 11 · разовая лицензия, без подписки. Это витрина продукта, не оферта."
+      },
+      en: {
+        brand:"Poverh", navFeatures:"Features", navPricing:"Pricing", navFaq:"FAQ",
+        h1:"Windows that stay on top — finally under control",
+        lead:"Poverh lists every always-on-top window on Windows, including ones other apps left stuck, and clears them in a click. No administrator rights. No subscription.",
+        ctaFree:"Download free", ctaPro:"Buy Pro — soon", ctaTeam:"Buy Team — soon",
+        ctaNote:"Payments are not connected yet. The MVP already runs on the PC.",
+        s1b:"Audit", s1t:"See which process pinned the window",
+        s2b:"1 click", s2t:"Unpin every non-system always-on-top flag",
+        s3b:"$0", s3t:"Free tier, no telemetry, no account",
+        featTitle:"Why use this if PowerToys is free?",
+        featLead:"PowerToys pins the active window. Poverh solves a different problem: a chat, a browser or an editor that stays above everything and will not yield. You get a full list and can clear flags set by other apps.",
+        f1t:"Full list", f1d:"Title, process, PID and source: Poverh, another app, or the system.",
+        f2t:"Hotkeys", f2d:"Ctrl+Alt+T pins or unpins the active window. Ctrl+Alt+U clears Poverh pins. Ctrl+Alt+Shift+P opens the panel.",
+        f3t:"Safe unpin", f3d:"Taskbar, Start and other system windows are skipped by Unpin all. No admin rights.",
+        f4t:"Tray and autostart", f4d:"Runs in the background and can start with Windows for the current user only.",
+        f5t:"Russian and English", f5d:"Both languages built in, no Microsoft Store account required.",
+        f6t:"On-device", f6d:"No telemetry, no cloud, no subscription inside the app.",
+        priceTitle:"Pricing", priceLead:"One-time licences, shown in tenge, rubles and US dollars. Payment is not enabled yet — this is a tariff preview.",
+        freeWho:"Personal", freeSub:"forever",
+        free1:"List of every always-on-top window", free2:"Unpin selected or unpin all others", free3:"System windows protected", free4:"No telemetry",
+        proWho:"Pro · 1 PC", proSub:"one-time licence",
+        pro1:"Everything in Free", pro2:"Pinning and hotkeys", pro3:"Autostart and tray", pro4:"Russian and English",
+        teamWho:"Team · up to 5 PCs", teamSub:"one-time, includes work use",
+        team1:"Everything in Pro", team2:"Commercial use", team3:"Up to 5 computers per buyer", team4:"Priority support once the store opens",
+        paySoon:"Gumroad / Lemon Squeezy / Kaspi — later",
+        priceJust:"Benchmarks: PinPoint is a $6.99 one-time Microsoft Store price (vendor blog, 17 October 2026); WindowTop Pro is $19 for 3 computers on the official site; Actual Window Guard is $39.95. Pro undercuts WindowTop and covers 'a window stuck on top', which free PowerToys Always On Top does not audit.",
+        cmpTitle:"Compared with other tools",
+        c0:"Product", c1:"Price", c2:"What it does", c3:"Limit",
+        p1:"Free", p1d:"Pin the active window", p1l:"Does not list pins made by other apps",
+        p2d:"Pin, border, opacity", p2l:"Microsoft Store, single-purpose",
+        p3d:"PiP, opacity, anchors", p3l:"Broader and costlier if you only need an unpin tool",
+        p4d:"Audit + pin + unpin all", p4l:"Windows-only for now, store not connected",
+        pinpointNote:"PinPoint's site defers to the Store listing; $6.99 is the regular US list price stated in the Automata Labs blog on 17 October 2026.",
+        faqTitle:"FAQ",
+        q1:"Does it need administrator rights?", a1:"No. It runs as the current user and does not change the firewall or UAC.",
+        q2:"Is this a subscription?", a2:"No. Free stays free. Pro and Team are designed as one-time licences. Payments are not accepted yet.",
+        q3:"What about the taskbar or Task Manager?", a3:"System windows are marked as protected and skipped by the mass unpin action.",
+        q4:"Is there a macOS version?", a4:"Not in the MVP. Keyboard and mouse sharing between Mac and Windows is a separate product, KM-Share, still in progress.",
+        q5:"Where does my data go?", a5:"Nowhere. Settings stay in the user folder. There is no telemetry.",
+        dlTitle:"Download", dlLead:"A public installer will appear when payments are connected. Today the working MVP lives in the project folder on the PC, and this page is the public site.",
+        dlRepo:"Repository and site", dlSetup:"Installer — soon",
+        foot:"Poverh · Windows 10 and 11 · one-time licence, no subscription. This page is a product preview, not an offer."
+      }
+    };
+    const PRICE = {
+      kzt: { free: "0 ₸", pro: "2 490 ₸", team: "6 900 ₸" },
+      rub: { free: "0 ₽", pro: "590 ₽", team: "1 690 ₽" },
+      usd: { free: "$0", pro: "$9.90", team: "$24" }
+    };
+    let lang = (localStorage.getItem("poverh-lang") === "en") ? "en" : "ru";
+    let cur = localStorage.getItem("poverh-cur") || "kzt";
+    function apply() {
+      document.documentElement.lang = lang;
+      document.title = lang === "ru" ? "Поверх — окна больше не залипают поверх всех" : "Poverh — always-on-top windows, under control";
+      document.querySelectorAll("[data-i]").forEach(el => {
+        const k = el.getAttribute("data-i");
+        if (I[lang][k] != null) el.textContent = I[lang][k];
+      });
+      document.querySelectorAll("[data-price]").forEach(el => {
+        el.textContent = PRICE[cur][el.getAttribute("data-price")];
+      });
+      document.getElementById("heroShot").src = lang === "en" ? "images/preview-en.png" : "images/preview-ru.png";
+      document.getElementById("langRu").classList.toggle("on", lang === "ru");
+      document.getElementById("langEn").classList.toggle("on", lang === "en");
+      document.getElementById("curKzt").classList.toggle("on", cur === "kzt");
+      document.getElementById("curRub").classList.toggle("on", cur === "rub");
+      document.getElementById("curUsd").classList.toggle("on", cur === "usd");
+    }
+    document.getElementById("langRu").onclick = () => { lang = "ru"; localStorage.setItem("poverh-lang", lang); apply(); };
+    document.getElementById("langEn").onclick = () => { lang = "en"; localStorage.setItem("poverh-lang", lang); apply(); };
+    document.getElementById("curKzt").onclick = () => { cur = "kzt"; localStorage.setItem("poverh-cur", cur); apply(); };
+    document.getElementById("curRub").onclick = () => { cur = "rub"; localStorage.setItem("poverh-cur", cur); apply(); };
+    document.getElementById("curUsd").onclick = () => { cur = "usd"; localStorage.setItem("poverh-cur", cur); apply(); };
+    apply();
+  </script>
+</body>
+</html>
